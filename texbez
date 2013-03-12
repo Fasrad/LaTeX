@@ -1,0 +1,64 @@
+#!/usr/bin/perl -w
+
+# USAGE: texbez <x> <y> <diameter>
+
+# texbez
+#
+# a program to draw circles in LaTeX using the quadratic bezier curves provided
+# by LaTeX. This program is released under the GNU GPLv3 or any later
+# version. Written in 2012 in perl 5.10 by chaz miller; special thanks to
+# Ingu Song and Pythagoras
+
+# a LaTeX quadratic bezier curve looks like this:
+
+# \qbezier(x1,y1)(x3,y3)(x2,y2)
+
+# where x1,y1 and x2,y2 are the end points and x3,y3 is the control point
+# don't ask about units; you set the units in your LaTeX file.
+
+if (scalar(@ARGV != 3)){ 
+    print "wrong number of arguments.\n";
+    print "USAGE: texbezier <x> <y> <diameter>\n";
+    exit;
+}
+
+foreach $arg (@ARGV){ 
+    if (!($arg =~ /\d/)){
+	print "Arguments must be numerical.\n";
+	print "USAGE: texbezier <x> <y> <diameter>\n";
+	exit;
+    }
+}
+
+$x = $ARGV[0];
+$y = $ARGV[1];
+$r = $ARGV[2] / 2;
+
+$curves = 8;  #how many curves to use; 8 is enough for most dolphins
+$pi = 3.14159265;
+$angle = (2 * $pi)/$curves;  
+
+print "%circle at x=$x, y=$y, with diameter $ARGV[2]\n";
+print "%$curves bezier primitives used\n";
+
+#recursively compute the bezier primitives and spin out the LaTeX
+for ($i=0; $i < (2 * $pi); $i+=$angle){
+    my $x1 = $x + $r*cos($i);
+    my $y1 = $y + $r*sin($i);
+    my $x2 = $x + $r*cos($i + $angle);
+    my $y2 = $y + $r*sin($i + $angle);
+    
+    $c = $r / cos($angle / 2); #create vector to the control point
+    my $x3 = $x + $c*cos($i + $angle/2);
+    my $y3 = $y + $c*sin($i + $angle/2);
+
+    print "\\qbezier ("; printf("%.3f", $x1); print ","; printf("%.3f", $y1); 
+    print ")("; printf("%.3f", $x3); print ","; printf("%.3f", $y3); 
+    print ")("; printf("%.3f", $x2); print ","; printf("%.3f", $y2); 
+    print ")\n";
+}
+print "\n";
+
+exit;
+
+
